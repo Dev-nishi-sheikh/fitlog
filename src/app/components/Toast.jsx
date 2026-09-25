@@ -2,20 +2,20 @@
 
 import { Toaster } from "react-hot-toast";
 
-const Toast = () => {
+export default function Toast() {
   return (
     <Toaster
-      position="top-right"
+      position="bottom-right"
       toastOptions={{
-        duration: 2500,
+        duration: 2400,
         style: {
-          background: "#181818",
+          background: "#11151c",
           color: "#fff",
-          border: "1px solid #333",
+          border: "1px solid #252b35",
+          fontSize: "12px",
+          fontWeight: "700",
         },
       }}
     />
   );
-};
-
-export default Toast;
+}

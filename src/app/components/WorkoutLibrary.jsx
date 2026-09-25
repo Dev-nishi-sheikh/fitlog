@@ -2,119 +2,166 @@
 
 import { useMemo, useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
+
 import WorkoutCard from "./WorkoutCard";
+import { useFitlog } from "../context/FitlogContext";
 
-const WorkoutLibrary = ({ workouts }) => {
-  const [sortBy, setSortBy] = useState("duration");
+export default function WorkoutLibrary() {
+  const {
+    workouts,
+    loading,
+  } = useFitlog();
+
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("duration");
 
-  const filteredWorkouts = useMemo(() => {
-    const result = workouts.filter((workout) => {
-      const keyword = search.toLowerCase();
+  const filtered = useMemo(() => {
 
-      return (
-        workout.name.toLowerCase().includes(keyword) ||
-        workout.muscleGroups.some((group) =>
-          group.toLowerCase().includes(keyword)
-        )
+    let result = [...(workouts || [])];
+
+    if (search.trim()) {
+      const q =
+        search.toLowerCase();
+
+      result = result.filter((workout) => {
+
+        const text = `
+          ${workout.name || ""}
+          ${workout.equipment || ""}
+          ${(workout.categories || []).join(" ")}
+          ${(workout.muscleGroups || []).join(" ")}
+        `.toLowerCase();
+
+        return text.includes(q);
+      });
+    }
+
+    if (sort === "duration") {
+      result.sort(
+        (a, b) =>
+          Number(a.duration || 0) -
+          Number(b.duration || 0)
       );
-    });
+    }
 
-    return [...result].sort((a, b) => {
-      if (sortBy === "duration") {
-        return a.duration - b.duration;
-      }
+    if (sort === "calories") {
+      result.sort(
+        (a, b) =>
+          Number(
+            b.caloriesBurned ||
+              b.calories ||
+              0
+          ) -
+          Number(
+            a.caloriesBurned ||
+              a.calories ||
+              0
+          )
+      );
+    }
 
-      if (sortBy === "calories") {
-        return a.caloriesBurned - b.caloriesBurned;
-      }
+    if (sort === "rating") {
+      result.sort(
+        (a, b) =>
+          Number(b.rating || 0) -
+          Number(a.rating || 0)
+      );
+    }
 
-      if (sortBy === "rating") {
-        return b.rating - a.rating;
-      }
+    return result;
+  }, [workouts, search, sort]);
 
-      return 0;
-    });
-  }, [workouts, search, sortBy]);
+  if (loading) {
+    return (
+      <div className="flex min-h-[350px] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <span className="loading loading-spinner loading-md text-[#ccff00]" />
+
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">
+            Loading workouts…
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <section id="library" className="section-padding">
-      <div className="container-fit">
-        <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
-          <div>
-            <p className="mb-2 text-xs font-black tracking-[0.25em] text-[#ccff00]">
-              WORKOUT LIBRARY
-            </p>
+    <div>
 
-            <h2 className="display-font text-5xl uppercase sm:text-6xl">
-              THE LIBRARY
-            </h2>
+      {/* SEARCH */}
 
-            <p className="mt-3 text-gray-500">
-              Twelve lifts covering every major muscle group.
-            </p>
-          </div>
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row">
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            {/* Search */}
-            <div className="flex items-center gap-2 rounded-full border border-[#333] bg-[#111] px-4 py-2">
-              <Search size={16} className="text-gray-500" />
+        <label className="input input-sm h-9 w-full rounded border-white/[0.08] bg-[#11151c] sm:max-w-xs">
+          <Search
+            size={14}
+            className="text-gray-600"
+          />
 
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search workout..."
-                className="w-full bg-transparent text-sm outline-none placeholder:text-gray-600 sm:w-44"
-              />
-            </div>
+          <input
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+            placeholder="Search workouts..."
+            className="text-[10px]"
+          />
+        </label>
 
-            {/* Sort */}
-            <div className="relative flex items-center rounded-full border border-[#333] bg-[#111]">
-              <span className="pl-4 text-xs font-bold text-gray-500">
-                Sort By
-              </span>
+        <label className="select select-sm h-9 w-full rounded border-white/[0.08] bg-[#11151c] sm:w-44">
+          <select
+            value={sort}
+            onChange={(e) =>
+              setSort(e.target.value)
+            }
+            className="text-[10px]"
+          >
+            <option value="duration">
+              Duration
+            </option>
 
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none bg-transparent px-4 py-2 pr-9 text-sm font-bold outline-none"
-              >
-                <option value="duration" className="bg-[#111]">
-                  Duration
-                </option>
+            <option value="calories">
+              Calories
+            </option>
 
-                <option value="calories" className="bg-[#111]">
-                  Calories
-                </option>
+            <option value="rating">
+              Rating
+            </option>
+          </select>
+        </label>
 
-                <option value="rating" className="bg-[#111]">
-                  Rating
-                </option>
-              </select>
+      </div>
 
-              <ChevronDown
-                size={15}
-                className="pointer-events-none absolute right-3"
-              />
-            </div>
-          </div>
+      {/* GRID */}
+
+      {filtered.length > 0 ? (
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+          {filtered.map((workout) => (
+            <WorkoutCard
+              key={workout.id}
+              workout={workout}
+            />
+          ))}
+
         </div>
 
-        {filteredWorkouts.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#333] py-20 text-center">
-            <p className="font-black uppercase">No workouts found</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredWorkouts.map((workout) => (
-              <WorkoutCard key={workout.id} workout={workout} />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
-};
+      ) : (
 
-export default WorkoutLibrary;
+        <div className="rounded-lg border border-dashed border-white/10 py-16 text-center">
+
+          <p className="text-sm font-black uppercase text-gray-400">
+            No workouts found
+          </p>
+
+          <p className="mt-2 text-[10px] text-gray-600">
+            Try another search.
+          </p>
+
+        </div>
+      )}
+
+    </div>
+  );
+}

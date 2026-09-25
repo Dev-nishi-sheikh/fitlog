@@ -1,23 +1,32 @@
 import Link from "next/link";
 
-const Footer = () => {
+export default function Footer() {
   return (
-    <footer className="border-t border-[#292929] bg-[#070707]">
-      <div className="container-fit flex min-h-[110px] flex-col items-center justify-between gap-5 py-7 sm:flex-row">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-full bg-[#ccff00] font-black text-black">
-            F
-          </div>
+    <footer className="border-t border-dotted border-[#ccff00]/40 bg-[#080a0f]">
+      <div className="mx-auto flex min-h-[58px] max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
 
-          <span className="font-black tracking-widest">FITLOG</span>
+        {/* LEFT - LOGO */}
+        <Link
+          href="/"
+          className="flex items-center gap-2"
+        >
+          <img
+            src="/assets/logo.png"
+            alt="FitLog Logo"
+            className="h-5 w-5 object-contain"
+          />
+
+          <span className="text-[11px] font-black uppercase tracking-wide text-white">
+            FITLOG
+          </span>
         </Link>
 
-        <p className="text-center text-xs text-gray-500 sm:text-right">
+        {/* RIGHT - COPYRIGHT */}
+        <p className="text-right text-[9px] font-medium text-gray-600 sm:text-[10px]">
           © 2026 FitLog — Workout Library. Train hard, log honest.
         </p>
+
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

@@ -1,28 +1,57 @@
 "use client";
 
-import { Bookmark, Check, ClipboardPlus } from "lucide-react";
+import {
+  Bookmark,
+  Check,
+  ClipboardPlus,
+} from "lucide-react";
+
 import { useFitlog } from "../context/FitlogContext";
 
-const WorkoutActions = ({ workout }) => {
-  const { plan, saved, addToPlan, saveForLater } = useFitlog();
+export default function WorkoutActions({
+  workout,
+}) {
+  const {
+    plan,
+    saved,
+    addToPlan,
+    saveForLater,
+  } = useFitlog();
 
-  const alreadyInPlan = plan.some((item) => item.id === workout.id);
-  const alreadySaved = saved.some((item) => item.id === workout.id);
+  const alreadyInPlan =
+    plan.some(
+      (item) =>
+        String(item.id) ===
+        String(workout.id)
+    );
 
-  const planFull = plan.length >= 5;
+  const alreadySaved =
+    saved.some(
+      (item) =>
+        String(item.id) ===
+        String(workout.id)
+    );
+
+  const planFull =
+    plan.length >= 5;
 
   return (
-    <div className="mt-8 grid gap-3 sm:grid-cols-2">
+    <div className="flex flex-col gap-3 sm:flex-row">
+
       <button
-        onClick={() => addToPlan(workout)}
-        disabled={alreadyInPlan || planFull}
-        className={`flex items-center justify-center gap-2 rounded-full px-5 py-4 text-sm font-black uppercase ${
+        onClick={() =>
+          addToPlan(workout)
+        }
+        disabled={
           alreadyInPlan || planFull
-            ? "cursor-not-allowed bg-[#292929] text-gray-500"
-            : "bg-[#ccff00] text-black hover:scale-[1.02]"
-        }`}
+        }
+        className="btn h-11 min-h-11 flex-1 rounded bg-[#ccff00] text-[10px] font-black uppercase text-black hover:bg-[#ccff00] disabled:bg-gray-700 disabled:text-gray-400"
       >
-        {alreadyInPlan ? <Check size={18} /> : <ClipboardPlus size={18} />}
+        {alreadyInPlan ? (
+          <Check size={16} />
+        ) : (
+          <ClipboardPlus size={16} />
+        )}
 
         {alreadyInPlan
           ? "Already in plan"
@@ -32,20 +61,23 @@ const WorkoutActions = ({ workout }) => {
       </button>
 
       <button
-        onClick={() => saveForLater(workout)}
+        onClick={() =>
+          saveForLater(workout)
+        }
         disabled={alreadySaved}
-        className={`flex items-center justify-center gap-2 rounded-full border px-5 py-4 text-sm font-black uppercase ${
-          alreadySaved
-            ? "cursor-not-allowed border-[#292929] text-gray-500"
-            : "border-white/30 hover:border-[#ccff00] hover:text-[#ccff00]"
-        }`}
+        className="btn btn-outline h-11 min-h-11 flex-1 rounded border-white/15 text-[10px] font-black uppercase text-white hover:border-[#ccff00] hover:bg-[#ccff00] hover:text-black disabled:border-white/10 disabled:text-gray-600"
       >
-        {alreadySaved ? <Check size={18} /> : <Bookmark size={18} />}
+        {alreadySaved ? (
+          <Check size={16} />
+        ) : (
+          <Bookmark size={16} />
+        )}
 
-        {alreadySaved ? "Saved" : "Save for later"}
+        {alreadySaved
+          ? "Saved"
+          : "Save for later"}
       </button>
+
     </div>
   );
-};
-
-export default WorkoutActions;
+}

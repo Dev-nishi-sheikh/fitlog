@@ -1,62 +1,146 @@
 "use client";
 
 import Link from "next/link";
-import { ClipboardList, Bookmark } from "lucide-react";
+import { usePathname } from "next/navigation";
+import {
+  Menu,
+  ClipboardList,
+  Bookmark,
+} from "lucide-react";
+import { useState } from "react";
 import { useFitlog } from "../context/FitlogContext";
 
-const Navbar = () => {
+export default function Navbar() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
   const { plan, saved } = useFitlog();
 
-  return (
-    <header className="sticky top-0 z-50 border-b border-[#292929] bg-[#0a0a0a]/95 backdrop-blur">
-      <div className="container-fit flex min-h-[76px] items-center justify-between gap-4">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-full bg-[#ccff00] font-black text-black">
-            F
-          </div>
+  const workoutActive = pathname === "/";
+  const planActive = pathname === "/my-plan";
 
-          <span className="text-xl font-black tracking-tight">FITLOG</span>
+  return (
+    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#080a0f]/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+
+        {/* LOGO */}
+        <Link
+          href="/"
+          className="flex items-center gap-3"
+        >
+          <img
+            src="/assets/logo.png"
+            alt="FitLog Logo"
+            className="h-6 w-6 object-contain"
+          />
+
+          <span className="text-lg font-black tracking-tight text-white">
+            FITLOG
+          </span>
         </Link>
 
-        {/* Navigation */}
-        <nav className="hidden items-center gap-8 md:flex">
+        {/* DESKTOP NAV */}
+        <nav className="hidden items-center gap-1 md:flex">
+
           <Link
-            href="/#library"
-            className="text-sm font-bold uppercase tracking-wider text-white hover:text-[#ccff00]"
+            href="/"
+            className={`rounded px-5 py-2.5 text-[14px] font-black uppercase tracking-wider transition ${
+              workoutActive
+                ? "bg-white/10 text-white"
+                : "text-gray-500 hover:bg-white/5 hover:text-white"
+            }`}
           >
             Workout
           </Link>
 
           <Link
             href="/my-plan"
-            className="text-sm font-bold uppercase tracking-wider text-white hover:text-[#ccff00]"
+            className={`rounded px-5 py-2.5 text-[14px] font-black uppercase tracking-wider transition ${
+              planActive
+                ? "bg-white/10 text-white"
+                : "text-gray-500 hover:bg-white/5 hover:text-white"
+            }`}
           >
             My Plan
           </Link>
+
         </nav>
 
-        {/* Counters */}
-        <div className="flex items-center gap-2">
+        {/* COUNTERS */}
+        <div className="hidden items-center gap-2 md:flex">
+
           <Link
             href="/my-plan"
-            className="flex items-center gap-1 rounded-full bg-[#ccff00] px-3 py-2 text-xs font-black text-black hover:scale-105"
+            className="flex h-9 items-center gap-2 rounded bg-[#ccff00] px-4 text-[13px] font-black uppercase text-black transition hover:opacity-90"
           >
-            <ClipboardList size={14} />
-            Plan {plan.length}
+            <ClipboardList size={16} />
+            PLAN {plan.length}
           </Link>
 
           <Link
             href="/my-plan"
-            className="flex items-center gap-1 rounded-full border border-white/30 px-3 py-2 text-xs font-black text-white hover:border-[#ccff00] hover:text-[#ccff00]"
+            className="flex h-9 items-center gap-2 rounded border border-white/15 px-4 text-[13px] font-black uppercase text-gray-300 transition hover:border-white/30 hover:text-white"
           >
-            <Bookmark size={14} />
-            Saved {saved.length}
+            <Bookmark size={16} />
+            SAVED {saved.length}
           </Link>
+
         </div>
+
+        {/* MOBILE */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="btn btn-square btn-ghost md:hidden"
+        >
+          <Menu size={22} />
+        </button>
+
       </div>
+
+      {/* MOBILE MENU */}
+      {open && (
+        <div className="border-t border-white/[0.08] bg-[#0d1016] p-4 md:hidden">
+
+          <div className="flex flex-col gap-2">
+
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="rounded px-3 py-3 text-[15px] font-black uppercase text-gray-300 hover:bg-white/5"
+            >
+              Workout
+            </Link>
+
+            <Link
+              href="/my-plan"
+              onClick={() => setOpen(false)}
+              className="rounded px-3 py-3 text-[15px] font-black uppercase text-gray-300 hover:bg-white/5"
+            >
+              My Plan
+            </Link>
+
+            <div className="mt-2 flex gap-2 border-t border-white/10 pt-4">
+
+              <Link
+                href="/my-plan"
+                className="rounded bg-[#ccff00] px-4 py-2.5 text-[13px] font-black text-black"
+              >
+                PLAN {plan.length}
+              </Link>
+
+              <Link
+                href="/my-plan"
+                className="rounded border border-white/15 px-4 py-2.5 text-[13px] font-black text-white"
+              >
+                SAVED {saved.length}
+              </Link>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
     </header>
   );
-};
-
-export default Navbar;
+}

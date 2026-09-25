@@ -1,28 +1,37 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import {
   ArrowLeft,
   Clock3,
   Flame,
   Star,
-  Dumbbell,
-  BarChart3,
 } from "lucide-react";
+
 import WorkoutActions from "../../components/WorkoutActions";
 
-const API_URL = "https://api.abcz.workers.dev/api/fitlog";
+const API_URL =
+  "https://api.api-store.workers.dev/api/fitlog";
 
-const getWorkout = async (id) => {
-  const res = await fetch(`${API_URL}/${id}`, {
-    cache: "no-store",
-  });
+async function getWorkout(id) {
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      cache: "no-store",
+    });
 
-  if (!res.ok) {
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+
+    return data?.data || data?.workout || data;
+  } catch (error) {
+    console.error("Single workout API error:", error);
+
     return null;
   }
-
-  return res.json();
-};
+}
 
 export default async function WorkoutDetails({ params }) {
   const { id } = await params;
@@ -33,120 +42,156 @@ export default async function WorkoutDetails({ params }) {
     notFound();
   }
 
+  const groups =
+    workout.muscleGroups ||
+    workout.categories ||
+    [];
+
+  const instructions = Array.isArray(workout.instructions)
+    ? workout.instructions
+    : [];
+
+  const calories =
+    workout.caloriesBurned ??
+    workout.calories ??
+    0;
+
   return (
-    <section className="section-padding">
-      <div className="container-fit">
+    <section className="bg-[#080a0f] px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+      <div className="mx-auto max-w-[1180px]">
+
+        {/* BACK */}
         <Link
           href="/#library"
-          className="mb-7 inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-[#ccff00]"
+          className="mb-7 inline-flex items-center gap-2 text-[14px] font-black uppercase tracking-wider text-gray-500 transition hover:text-[#ccff00]"
         >
           <ArrowLeft size={17} />
           Back to library
         </Link>
 
-        <div className="grid overflow-hidden rounded-3xl border border-[#292929] bg-[#111] lg:grid-cols-2">
-          {/* Image */}
-          <div className="min-h-[450px] bg-[#181818] lg:min-h-[700px]">
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+
+          {/* IMAGE */}
+          <div className="h-fit overflow-hidden rounded-xl border border-white/[0.08] bg-[#11151c] lg:sticky lg:top-24">
             <img
-              src={workout.image}
+              src={
+                workout.image ||
+                "/assets/banner.png"
+              }
               alt={workout.name}
-              className="h-full min-h-[450px] w-full object-cover lg:min-h-[700px]"
+              className="aspect-[0.9/1] w-full object-cover lg:aspect-[0.85/1]"
             />
           </div>
 
-          {/* Content */}
-          <div className="p-7 sm:p-10 lg:p-12">
-            <div className="flex flex-wrap gap-2">
-              {workout.muscleGroups.map((group) => (
+          {/* CONTENT */}
+          <div>
+            <p className="text-[14px] font-black uppercase tracking-[0.25em] text-[#ccff00]">
+              WORKOUT DETAIL
+            </p>
+
+            <h1 className="font-display mt-3 text-4xl uppercase leading-[0.95] text-white sm:text-5xl lg:text-6xl">
+              {workout.name}
+            </h1>
+
+            <p className="mt-5 max-w-2xl text-[17px] leading-7 text-gray-500">
+              {workout.description ||
+                "A focused workout designed to build strength, consistency, and performance."}
+            </p>
+
+            {/* TAGS */}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {groups.map((group) => (
                 <span
                   key={group}
-                  className="rounded-full bg-[#ccff00] px-3 py-1 text-[10px] font-black uppercase text-black"
+                  className="rounded-md border border-[#ccff00]/20 bg-[#ccff00]/5 px-3 py-1.5 text-[12px] font-black uppercase tracking-wide text-[#ccff00]"
                 >
                   {group}
                 </span>
               ))}
             </div>
 
-            <h1 className="display-font mt-5 text-5xl uppercase leading-none sm:text-6xl">
-              {workout.name}
-            </h1>
+            {/* SPECS */}
+            <div className="mt-8 overflow-hidden rounded-lg border border-white/[0.08] bg-[#11151c]">
+              <Spec
+                label="Equipment"
+                value={workout.equipment}
+              />
 
-            <p className="mt-5 leading-7 text-gray-400">
-              {workout.description}
-            </p>
+              <Spec
+                label="Difficulty"
+                value={workout.difficulty}
+              />
 
-            {/* Specs */}
-            <div className="mt-8 overflow-hidden rounded-2xl border border-[#292929]">
-              <div className="border-b border-[#292929] bg-[#171717] p-4">
-                <div className="flex items-center gap-2">
-                  <BarChart3 size={18} className="text-[#ccff00]" />
-                  <span className="font-black uppercase tracking-wide">
-                    Key Specs
+              <Spec
+                label="Sets"
+                value={workout.sets}
+              />
+
+              <Spec
+                label="Reps"
+                value={workout.reps}
+              />
+
+              <Spec
+                label="Duration"
+                value={`${workout.duration || 0} min`}
+              />
+
+              <Spec
+                label="Calories"
+                value={`${calories} kcal`}
+              />
+
+              <Spec
+                label="Rating"
+                value={
+                  <span className="flex items-center gap-1 text-[#ccff00]">
+                    <Star
+                      size={16}
+                      fill="currentColor"
+                    />
+                    {workout.rating || "—"}
                   </span>
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2">
-                <Spec label="Equipment" value={workout.equipment} />
-                <Spec label="Difficulty" value={workout.difficulty} />
-                <Spec label="Sets" value={workout.sets} />
-                <Spec label="Reps" value={workout.reps} />
-                <Spec label="Duration" value={`${workout.duration} min`} />
-                <Spec
-                  label="Calories"
-                  value={`${workout.caloriesBurned} kcal`}
-                />
-                <Spec label="Rating" value={workout.rating} />
-              </div>
+                }
+                last
+              />
             </div>
 
-            {/* Stats */}
-            <div className="mt-5 flex flex-wrap gap-5 text-sm text-gray-400">
-              <span className="flex items-center gap-2">
-                <Clock3 size={16} className="text-[#ccff00]" />
-                {workout.duration} min
-              </span>
-
-              <span className="flex items-center gap-2">
-                <Flame size={16} className="text-[#ccff00]" />
-                {workout.caloriesBurned} kcal
-              </span>
-
-              <span className="flex items-center gap-2">
-                <Star
-                  size={16}
-                  className="text-[#ccff00]"
-                  fill="currentColor"
-                />
-                {workout.rating}
-              </span>
-
-              <span className="flex items-center gap-2">
-                <Dumbbell size={16} className="text-[#ccff00]" />
-                {workout.equipment}
-              </span>
-            </div>
-
-            {/* Instructions */}
-            <div className="mt-10">
-              <h2 className="text-lg font-black uppercase">Instructions</h2>
+            {/* INSTRUCTIONS */}
+            <div className="mt-9">
+              <p className="text-[14px] font-black uppercase tracking-[0.25em] text-[#ccff00]">
+                INSTRUCTIONS
+              </p>
 
               <ol className="mt-5 space-y-4">
-                {workout.instructions.map((instruction, index) => (
-                  <li key={index} className="flex gap-4">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#ccff00] text-xs font-black text-black">
-                      {index + 1}
-                    </span>
+                {instructions.length > 0 ? (
+                  instructions.map((step, index) => (
+                    <li
+                      key={`${index}-${step}`}
+                      className="flex gap-4"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/[0.05] text-[12px] font-black text-[#ccff00]">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
 
-                    <p className="pt-1 text-sm leading-6 text-gray-400">
-                      {instruction}
-                    </p>
+                      <p className="pt-1 text-[15px] leading-6 text-gray-500">
+                        {step}
+                      </p>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-[15px] text-gray-600">
+                    Follow proper form and controlled
+                    movement throughout the exercise.
                   </li>
-                ))}
+                )}
               </ol>
             </div>
 
-            <WorkoutActions workout={workout} />
+            {/* ACTIONS */}
+            <div className="mt-9">
+              <WorkoutActions workout={workout} />
+            </div>
           </div>
         </div>
       </div>
@@ -154,12 +199,26 @@ export default async function WorkoutDetails({ params }) {
   );
 }
 
-const Spec = ({ label, value }) => {
+function Spec({
+  label,
+  value,
+  last = false,
+}) {
   return (
-    <div className="flex justify-between gap-4 border-b border-[#292929] p-4 text-sm">
-      <span className="font-bold text-gray-500 uppercase">{label}</span>
+    <div
+      className={`flex items-center justify-between gap-5 px-4 py-3.5 sm:px-5 ${
+        !last
+          ? "border-b border-white/[0.06]"
+          : ""
+      }`}
+    >
+      <span className="text-[12px] font-black uppercase tracking-wider text-gray-600">
+        {label}
+      </span>
 
-      <span className="text-right font-bold">{value}</span>
+      <strong className="text-right text-[15px] font-bold text-gray-300">
+        {value || "—"}
+      </strong>
     </div>
   );
-};
+}

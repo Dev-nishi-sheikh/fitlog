@@ -3,28 +3,32 @@ import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <section className="flex min-h-[70vh] items-center justify-center px-5">
+    <main className="flex min-h-[75vh] items-center justify-center bg-[#080a0f] px-4">
+
       <div className="text-center">
-        <p className="text-sm font-black tracking-[0.3em] text-[#ccff00]">
-          ERROR 404
+
+        <p className="text-7xl font-black text-[#ccff00]">
+          404
         </p>
 
-        <h1 className="display-font mt-4 text-7xl uppercase sm:text-9xl">
-          NOT FOUND
+        <h1 className="mt-4 text-3xl font-black uppercase text-white">
+          Page Not Found
         </h1>
 
-        <p className="mx-auto mt-5 max-w-md text-gray-500">
+        <p className="mt-2 text-sm text-gray-600">
           The workout or page you are looking for does not exist.
         </p>
 
         <Link
           href="/"
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#ccff00] px-6 py-3 text-sm font-black uppercase text-black"
+          className="btn mt-7 h-10 min-h-10 rounded bg-[#ccff00] px-5 text-[10px] font-black uppercase text-black hover:bg-[#ccff00]"
         >
-          <ArrowLeft size={17} />
+          <ArrowLeft size={14} />
           Back Home
         </Link>
+
       </div>
-    </section>
+
+    </main>
   );
 }
