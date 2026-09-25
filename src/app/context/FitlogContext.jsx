@@ -166,9 +166,7 @@ export function FitlogProvider({ children }) {
     toast.success("Saved for later");
   };
 
-  /* =========================
-     REMOVE PLAN
-  ========================== */
+  
 
   const removeFromPlan = (id) => {
     setPlan((prev) =>
@@ -181,9 +179,6 @@ export function FitlogProvider({ children }) {
     toast.success("Removed from today's plan");
   };
 
-  /* =========================
-     REMOVE SAVED
-  ========================== */
 
   const removeFromSaved = (id) => {
     setSaved((prev) =>
